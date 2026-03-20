@@ -49,7 +49,8 @@ fun BottomNavBar(
             .fillMaxWidth()
             .background(NavBarSurface)
             .windowInsetsPadding(WindowInsets.navigationBars)
-            .padding(horizontal = 8.dp, vertical = 8.dp)
+            .padding(horizontal = 8.dp)
+            .padding(top = 8.dp, bottom = 12.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),

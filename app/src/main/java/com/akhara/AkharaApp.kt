@@ -8,6 +8,7 @@ import com.akhara.data.db.AkharaDatabase
 import com.akhara.data.repository.WorkoutRepository
 import com.akhara.notifications.InsightWorker
 import com.akhara.notifications.NotificationHelper
+import com.akhara.service.WorkoutNotificationManager
 import java.util.concurrent.TimeUnit
 
 class AkharaApp : Application() {
@@ -18,6 +19,7 @@ class AkharaApp : Application() {
     override fun onCreate() {
         super.onCreate()
         NotificationHelper.createChannel(this)
+        WorkoutNotificationManager.createChannel(this)
         scheduleInsightWorker()
     }
 

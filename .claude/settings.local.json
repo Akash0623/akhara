@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls D:/PROJECTS/Personal/Akhara/gradlew*)",
+      "Bash(git add:*)"
+    ]
+  }
+}

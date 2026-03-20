@@ -1,5 +1,6 @@
 package com.akhara.ui.navigation
 
+import android.app.Application
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.Lifecycle
@@ -31,7 +32,8 @@ import com.akhara.ui.screens.workout.LogWorkoutViewModel
 @Composable
 fun NavGraph(
     navController: NavHostController,
-    repository: WorkoutRepository
+    repository: WorkoutRepository,
+    application: Application
 ) {
     NavHost(
         navController = navController,
@@ -82,7 +84,7 @@ fun NavGraph(
         }
 
         composable(Routes.LOG_WORKOUT) {
-            val vm: LogWorkoutViewModel = viewModel(factory = LogWorkoutViewModel.Factory(repository, null))
+            val vm: LogWorkoutViewModel = viewModel(factory = LogWorkoutViewModel.Factory(application, repository, null))
             LogWorkoutScreen(
                 viewModel = vm,
                 onBack = { navController.popBackStack() }
@@ -94,7 +96,7 @@ fun NavGraph(
             arguments = listOf(navArgument("sessionId") { type = NavType.IntType })
         ) { backStackEntry ->
             val sessionId = backStackEntry.arguments?.getInt("sessionId")
-            val vm: LogWorkoutViewModel = viewModel(factory = LogWorkoutViewModel.Factory(repository, sessionId))
+            val vm: LogWorkoutViewModel = viewModel(factory = LogWorkoutViewModel.Factory(application, repository, sessionId))
             LogWorkoutScreen(
                 viewModel = vm,
                 onBack = { navController.popBackStack() }

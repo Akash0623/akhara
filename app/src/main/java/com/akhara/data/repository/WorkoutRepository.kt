@@ -40,13 +40,8 @@ class WorkoutRepository(private val db: AkharaDatabase) {
         exerciseDao.insertExercise(Exercise(name = name, muscleGroup = muscleGroup, isCustom = true))
     }
 
-    suspend fun getExerciseById(id: Int): Exercise? {
-        var result: Exercise? = null
-        getAllExercises().collect { list ->
-            result = list.find { it.id == id }
-        }
-        return result
-    }
+    suspend fun getExerciseById(id: Int): Exercise? =
+        exerciseDao.getExerciseById(id)
 
     // ---- Workout Sessions ----
     fun getAllSessions(): Flow<List<WorkoutSession>> = workoutDao.getAllSessions()
@@ -74,8 +69,13 @@ class WorkoutRepository(private val db: AkharaDatabase) {
         workoutDao.insertSets(setsWithSessionId)
     }
 
+    suspend fun replaceSetsForExercise(sessionId: Int, exerciseId: Int, sets: List<WorkoutSet>) {
+        val setsWithSessionId = sets.map { it.copy(sessionId = sessionId) }
+        workoutDao.replaceSetsForExercise(sessionId, exerciseId, setsWithSessionId)
+    }
+
     suspend fun getSessionById(sessionId: Int): WorkoutSession? =
-        workoutDao.getSessionsBetweenSync(0, Long.MAX_VALUE).find { it.id == sessionId }
+        workoutDao.getSessionByIdDirect(sessionId)
 
     suspend fun getExerciseByIdSync(id: Int): Exercise? =
         exerciseDao.getExerciseById(id)
@@ -135,7 +135,7 @@ class WorkoutRepository(private val db: AkharaDatabase) {
     // ---- Stats ----
     suspend fun getWorkoutCountForWeek(date: LocalDate = LocalDate.now()): Int {
         val (start, end) = weekBounds(date)
-        return workoutDao.getSessionCountBetween(start, end)
+        return workoutDao.getUniqueDayCountBetween(start, end)
     }
 
     suspend fun getAvgRestTimeForRange(startDate: Long, endDate: Long): Float? =
@@ -175,6 +175,9 @@ class WorkoutRepository(private val db: AkharaDatabase) {
     suspend fun getSessionsBetweenSync(startDate: Long, endDate: Long): List<WorkoutSession> =
         workoutDao.getSessionsBetweenSync(startDate, endDate)
 
+    suspend fun getLastSetsForExercise(exerciseId: Int): List<WorkoutSet> =
+        workoutDao.getLastSetsForExercise(exerciseId)
+
     // ---- Streak Calculation ----
     suspend fun calculateStreak(): Pair<Int, Int> {
         val settings = settingsDao.getSettingsSync() ?: UserSettings()
@@ -187,7 +190,7 @@ class WorkoutRepository(private val db: AkharaDatabase) {
 
         for (i in 0 until 104) {
             val (start, end) = weekBounds(weekStart)
-            val count = workoutDao.getSessionCountBetween(start, end)
+            val count = workoutDao.getUniqueDayCountBetween(start, end)
             if (count >= goal) {
                 tempStreak++
                 if (tempStreak > longestStreak) longestStreak = tempStreak

@@ -36,7 +36,7 @@ import net.sqlcipher.database.SupportFactory
         PlannedExercise::class,
         BodyWeight::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 abstract class AkharaDatabase : RoomDatabase() {
@@ -53,6 +53,15 @@ abstract class AkharaDatabase : RoomDatabase() {
         private var INSTANCE: AkharaDatabase? = null
 
         private const val DB_NAME = "akhara_database"
+
+        private val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE INDEX IF NOT EXISTS index_workout_sets_exerciseId_sessionId " +
+                    "ON workout_sets(exerciseId, sessionId)"
+                )
+            }
+        }
 
         private val MIGRATION_1_2 = object : Migration(1, 2) {
             override fun migrate(db: SupportSQLiteDatabase) {
@@ -96,8 +105,14 @@ abstract class AkharaDatabase : RoomDatabase() {
                     DB_NAME
                 )
                     .openHelperFactory(factory)
-                    .addMigrations(MIGRATION_1_2)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
                     .addCallback(SeedCallback(appContext))
+                    .addCallback(object : Callback() {
+                        override fun onOpen(db: SupportSQLiteDatabase) {
+                            super.onOpen(db)
+                            db.execSQL("PRAGMA foreign_keys = ON")
+                        }
+                    })
                     .build()
                     .also { INSTANCE = it }
             }

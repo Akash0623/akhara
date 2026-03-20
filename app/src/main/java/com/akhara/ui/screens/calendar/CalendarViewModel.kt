@@ -76,6 +76,15 @@ class CalendarViewModel(private val repository: WorkoutRepository) : ViewModel()
         }
     }
 
+    fun deleteSession(session: WorkoutSession) {
+        viewModelScope.launch {
+            repository.deleteWorkout(session)
+            // Refresh the selected date and month
+            _uiState.value.selectedDate?.let { selectDate(it) }
+            loadMonth(_uiState.value.yearMonth)
+        }
+    }
+
     fun refresh() {
         loadMonth(_uiState.value.yearMonth)
     }

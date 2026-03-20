@@ -7,12 +7,12 @@ plugins {
 
 android {
     namespace = "com.akhara"
-    compileSdk = 34 // Use 34 for stability with Kotlin 1.9, or use a newer AGP for 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.akhara"
         minSdk = 26
-        targetSdk = 34
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
     }

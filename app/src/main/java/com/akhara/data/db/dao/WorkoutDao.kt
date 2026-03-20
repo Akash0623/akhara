@@ -48,6 +48,9 @@ interface WorkoutDao {
     @Query("SELECT COUNT(*) FROM workout_sessions WHERE date BETWEEN :startDate AND :endDate")
     suspend fun getSessionCountBetween(startDate: Long, endDate: Long): Int
 
+    @Query("SELECT COUNT(DISTINCT date) FROM workout_sessions WHERE date BETWEEN :startDate AND :endDate")
+    suspend fun getUniqueDayCountBetween(startDate: Long, endDate: Long): Int
+
     @Query(
         "SELECT AVG(restSeconds) FROM workout_sets WHERE sessionId IN " +
         "(SELECT id FROM workout_sessions WHERE date BETWEEN :startDate AND :endDate) AND restSeconds > 0"
@@ -65,6 +68,9 @@ interface WorkoutDao {
 
     @Query("DELETE FROM workout_sets WHERE sessionId = :sessionId")
     suspend fun deleteSetsForSession(sessionId: Int)
+
+    @Query("DELETE FROM workout_sets WHERE sessionId = :sessionId AND exerciseId = :exerciseId")
+    suspend fun deleteSetsForExercise(sessionId: Int, exerciseId: Int)
 
     @Query(
         "SELECT e.muscleGroup FROM workout_sets ws " +
@@ -119,4 +125,24 @@ interface WorkoutDao {
         "WHERE exerciseId = :exerciseId AND reps >= 1 AND sessionId = :sessionId"
     )
     suspend fun getMaxWeightForExerciseInSession(exerciseId: Int, sessionId: Int): Float?
+
+    @Query(
+        "SELECT * FROM workout_sets WHERE exerciseId = :exerciseId " +
+        "AND sessionId = (" +
+        "  SELECT ws.sessionId FROM workout_sets ws " +
+        "  JOIN workout_sessions s ON s.id = ws.sessionId " +
+        "  WHERE ws.exerciseId = :exerciseId " +
+        "  ORDER BY s.date DESC, s.id DESC LIMIT 1" +
+        ") ORDER BY setNumber"
+    )
+    suspend fun getLastSetsForExercise(exerciseId: Int): List<WorkoutSet>
+
+    @Query("SELECT * FROM workout_sessions WHERE id = :sessionId")
+    suspend fun getSessionByIdDirect(sessionId: Int): WorkoutSession?
+
+    @Transaction
+    suspend fun replaceSetsForExercise(sessionId: Int, exerciseId: Int, sets: List<WorkoutSet>) {
+        deleteSetsForExercise(sessionId, exerciseId)
+        insertSets(sets)
+    }
 }

@@ -20,7 +20,11 @@ import androidx.room.PrimaryKey
             childColumns = ["exerciseId"]
         )
     ],
-    indices = [Index("sessionId"), Index("exerciseId")]
+    indices = [
+        Index("sessionId"),
+        Index("exerciseId"),
+        Index(value = ["exerciseId", "sessionId"])
+    ]
 )
 data class WorkoutSet(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,

@@ -39,10 +39,6 @@ class MainActivity : FragmentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        window.setFlags(
-            WindowManager.LayoutParams.FLAG_SECURE,
-            WindowManager.LayoutParams.FLAG_SECURE
-        )
 
         lockManager = AppLockManager(this)
         val app = application as AkharaApp
@@ -100,7 +96,8 @@ class MainActivity : FragmentActivity() {
                                 Box(modifier = Modifier.padding(innerPadding)) {
                                     NavGraph(
                                         navController = navController,
-                                        repository = app.repository
+                                        repository = app.repository,
+                                        application = app
                                     )
                                 }
                             }
