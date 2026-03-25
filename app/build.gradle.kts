@@ -75,6 +75,9 @@ dependencies {
 
     implementation("androidx.work:work-runtime-ktx:2.9.0")
 
+    // Media session for lock screen controls
+    implementation("androidx.media:media:1.7.0")
+
     // Security: SQLCipher for database encryption at rest
     implementation("net.zetetic:android-database-sqlcipher:4.5.4")
     implementation("androidx.sqlite:sqlite-ktx:2.4.0")

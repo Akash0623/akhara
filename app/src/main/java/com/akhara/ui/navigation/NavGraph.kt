@@ -24,6 +24,7 @@ import com.akhara.ui.screens.insights.InsightsViewModel
 import com.akhara.ui.screens.planner.WeeklyPlannerScreen
 import com.akhara.ui.screens.planner.WeeklyPlannerViewModel
 import com.akhara.ui.screens.settings.SecuritySettingsScreen
+import com.akhara.ui.screens.calendar.ViewWorkoutScreen
 import com.akhara.ui.screens.stats.StatsScreen
 import com.akhara.ui.screens.stats.StatsViewModel
 import com.akhara.ui.screens.workout.LogWorkoutScreen
@@ -66,7 +67,8 @@ fun NavGraph(
             CalendarScreen(
                 viewModel = vm,
                 onLogWorkout = { navController.navigate(Routes.LOG_WORKOUT) },
-                onEditWorkout = { sessionId -> navController.navigate(Routes.editWorkout(sessionId)) }
+                onEditWorkout = { sessionId -> navController.navigate(Routes.editWorkout(sessionId)) },
+                onViewWorkout = { sessionId -> navController.navigate(Routes.viewWorkout(sessionId)) }
             )
         }
 
@@ -99,6 +101,18 @@ fun NavGraph(
             val vm: LogWorkoutViewModel = viewModel(factory = LogWorkoutViewModel.Factory(application, repository, sessionId))
             LogWorkoutScreen(
                 viewModel = vm,
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(
+            Routes.VIEW_WORKOUT,
+            arguments = listOf(navArgument("sessionId") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val sessionId = backStackEntry.arguments?.getInt("sessionId") ?: return@composable
+            ViewWorkoutScreen(
+                sessionId = sessionId,
+                repository = repository,
                 onBack = { navController.popBackStack() }
             )
         }

@@ -1,8 +1,14 @@
 {
   "permissions": {
     "allow": [
-      "Bash(ls D:/PROJECTS/Personal/Akhara/gradlew*)",
-      "Bash(git add:*)"
-    ]
+      "Bash(./gradlew installDebug 2>&1)",
+      "Bash(start:*)",
+      "Bash(./gradlew assembleDebug)",
+      "Bash(ls \"D:\\\\PROJECTS\\\\Personal\\\\Akhara\\\\.claude\\\\worktrees\\\\agent-ac86a47b\\\\gradlew\"*)",
+      "Bash(ls:*)",
+      "Bash(gradle assembleDebug)",
+      "Bash(./gradlew installDebug)"
+    ],
+    "defaultMode": "bypassPermissions"
   }
 }

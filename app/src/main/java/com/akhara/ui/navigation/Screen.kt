@@ -19,7 +19,9 @@ object Routes {
     const val EDIT_WORKOUT = "log_workout/{sessionId}"
     const val PLANNER = "planner"
     const val INSIGHTS = "insights"
+    const val VIEW_WORKOUT = "view_workout/{sessionId}"
     const val SECURITY_SETTINGS = "security_settings"
 
     fun editWorkout(sessionId: Int) = "log_workout/$sessionId"
+    fun viewWorkout(sessionId: Int) = "view_workout/$sessionId"
 }

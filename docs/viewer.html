@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Akhara — Visual Design Reference</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #000000;
+    --surface: #121212;
+    --surface-elevated: #1E1E1E;
+    --surface-highest: #2A2A2A;
+    --accent: #FF6B2C;
+    --accent-light: #FF8F5C;
+    --accent-dim: rgba(255, 107, 44, 0.15);
+    --success: #00E676;
+    --warning: #FFD740;
+    --error: #FF5252;
+    --gold: #FFD700;
+    --text-primary: #FFFFFF;
+    --text-secondary: #B0B0B0;
+    --text-tertiary: #666666;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* Resize handle */
+  .resize-container {
+    width: 80%;
+    min-width: 360px;
+    max-width: 1200px;
+    margin: 0 auto;
+    resize: both;
+    overflow: auto;
+    border: 1px solid var(--surface-highest);
+    border-radius: 16px;
+    padding: 0;
+    position: relative;
+    min-height: 100vh;
+  }
+
+  .resize-label {
+    position: fixed;
+    bottom: 16px;
+    right: 16px;
+    background: var(--surface-elevated);
+    color: var(--text-tertiary);
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    z-index: 100;
+    pointer-events: none;
+  }
+
+  .content {
+    padding: 48px 32px 80px;
+    max-width: 100%;
+  }
+
+  /* Header */
+  .hero {
+    text-align: center;
+    padding: 64px 0 48px;
+    border-bottom: 1px solid var(--surface-highest);
+    margin-bottom: 48px;
+  }
+  .hero h1 {
+    font-size: 42px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-light));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 8px;
+  }
+  .hero .subtitle {
+    font-size: 16px;
+    color: var(--text-secondary);
+    font-weight: 400;
+  }
+  .hero .tagline {
+    margin-top: 24px;
+    font-size: 13px;
+    color: var(--text-tertiary);
+    font-style: italic;
+  }
+
+  /* Streaming cursor */
+  .cursor {
+    display: inline-block;
+    width: 2px;
+    height: 1.1em;
+    background: var(--accent);
+    animation: blink 0.8s infinite;
+    vertical-align: text-bottom;
+    margin-left: 2px;
+  }
+  @keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+  }
+
+  /* Section styling */
+  .section {
+    margin-bottom: 48px;
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  .section.visible {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+
+  h2 {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--accent-dim);
+  }
+
+  h3 {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 32px 0 16px;
+  }
+
+  h4 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--accent-light);
+    margin: 24px 0 12px;
+  }
+
+  p, li {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+  }
+
+  strong {
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+
+  em { color: var(--text-tertiary); }
+
+  ul, ol {
+    padding-left: 20px;
+    margin-bottom: 16px;
+  }
+  li { margin-bottom: 6px; }
+
+  /* Code blocks */
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    background: var(--surface);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: var(--accent-light);
+  }
+
+  pre {
+    background: var(--surface);
+    border: 1px solid var(--surface-highest);
+    border-radius: 12px;
+    padding: 20px;
+    overflow-x: auto;
+    margin: 16px 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    line-height: 1.8;
+    color: var(--text-secondary);
+  }
+
+  /* Color swatches */
+  .color-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 8px 0;
+    padding: 8px 12px;
+    background: var(--surface);
+    border-radius: 8px;
+  }
+  .color-swatch {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.1);
+    flex-shrink: 0;
+  }
+  .color-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .color-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+  .color-hex {
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text-tertiary);
+  }
+
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 13px;
+  }
+  th {
+    text-align: left;
+    padding: 12px 16px;
+    background: var(--surface);
+    color: var(--accent);
+    font-weight: 600;
+    border-bottom: 2px solid var(--accent-dim);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  td {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--surface-elevated);
+    color: var(--text-secondary);
+  }
+  tr:hover td {
+    background: var(--surface);
+  }
+
+  /* Cards for app analysis */
+  .app-card {
+    background: var(--surface);
+    border-radius: 16px;
+    padding: 24px;
+    margin: 16px 0;
+    border-left: 3px solid var(--accent);
+  }
+  .app-card h3 {
+    margin-top: 0;
+    color: var(--accent);
+  }
+
+  /* Component preview cards */
+  .component-preview {
+    background: var(--surface);
+    border: 1px solid var(--surface-highest);
+    border-radius: 16px;
+    padding: 24px;
+    margin: 16px 0;
+  }
+  .component-preview .label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-tertiary);
+    margin-bottom: 12px;
+  }
+
+  /* Button previews */
+  .btn-preview {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 24px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin: 4px 8px 4px 0;
+    font-family: 'Inter', sans-serif;
+    border: none;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #000;
+    height: 52px;
+  }
+  .btn-primary:hover { background: var(--accent-light); }
+  .btn-secondary {
+    background: transparent;
+    color: var(--accent);
+    border: 1.5px solid var(--accent);
+    height: 44px;
+  }
+  .btn-danger {
+    background: transparent;
+    color: var(--error);
+    border: 1.5px solid var(--error);
+    height: 44px;
+  }
+  .btn-ghost {
+    background: transparent;
+    color: var(--text-secondary);
+    height: 44px;
+  }
+
+  /* Divider */
+  hr {
+    border: none;
+    border-top: 1px solid var(--surface-highest);
+    margin: 48px 0;
+  }
+
+  /* Progress bar */
+  .progress-demo {
+    height: 3px;
+    background: var(--surface-highest);
+    border-radius: 2px;
+    overflow: hidden;
+    margin: 12px 0;
+  }
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--accent), var(--success));
+    border-radius: 2px;
+    transition: width 2s ease;
+  }
+
+  /* Streaming line effect */
+  .stream-line {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  .stream-line.revealed {
+    opacity: 1;
+    transform: translateX(0);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--surface-highest); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text-tertiary); }
+</style>
+</head>
+<body>
+
+<div class="resize-container" id="container">
+<div class="content" id="content">
+
+  <div class="hero">
+    <h1>AKHARA</h1>
+    <div class="subtitle">Visual Design Reference</div>
+    <div class="tagline">Dark-Themed Workout Tracker for Indian Gym-Goers (20-35)</div>
+    <div style="margin-top: 16px;">
+      <div class="progress-demo"><div class="progress-fill" id="mainProgress"></div></div>
+    </div>
+  </div>
+
+  <div id="streamTarget"></div>
+  <span class="cursor" id="cursor"></span>
+
+</div>
+</div>
+
+<div class="resize-label" id="resizeLabel">Drag corner to resize</div>
+
+<script>
+const DOC = [
+  { type: "section", id: "s1" },
+  { type: "h2", text: "1. Competitive Visual Analysis" },
+
+  { type: "app-card", title: "1.1 Nike Training Club", lines: [
+    { label: "Background", hex: "#0D0D0D", desc: "Near-true black" },
+    { label: "Cards", hex: "#1A1A1A", desc: "Surface" },
+    { label: "Accent", hex: "#FF3C2F", desc: "Nike red — CTAs only" },
+    { label: "Volt", hex: "#CCFF00", desc: "Active/live states" },
+    { label: "Success", hex: "#30D158", desc: "Completion" }
+  ], notes: [
+    "Full-bleed workout imagery with gradient overlays",
+    "Typography as design element — oversized, cropped letterforms",
+    "Massive display numbers for reps/time (72-96sp)",
+    "Haptic pulses on rep completion synced with visual feedback",
+    "True black (#000000) for AMOLED optimization"
+  ]},
+
+  { type: "app-card", title: "1.2 WHOOP", lines: [
+    { label: "Background", hex: "#000000", desc: "True black" },
+    { label: "Strain", hex: "#0085FF", desc: "Primary accent (blue)" },
+    { label: "Recovery", hex: "#00D632", desc: "Green" },
+    { label: "Warning", hex: "#FFD60A", desc: "Yellow" },
+    { label: "Sleep", hex: "#BF5AF2", desc: "Purple" }
+  ], notes: [
+    "Numbers are the hero — massive, bold, centered (80-120sp)",
+    "Circular strain gauge with gradient fill",
+    "Data-dense but not cluttered — generous whitespace",
+    "Systematic color coding: blue=strain, green=recovery, purple=sleep",
+    "Smooth count-up animations when scores load"
+  ]},
+
+  { type: "app-card", title: "1.3 Strava (Dark Mode)", lines: [
+    { label: "Background", hex: "#000000", desc: "True black" },
+    { label: "Accent", hex: "#FC4C02", desc: "Strava orange" },
+    { label: "PR", hex: "#FFD700", desc: "Gold crown" },
+    { label: "Surface", hex: "#1A1A1A", desc: "Card" }
+  ], notes: [
+    "Large central metric (48-64sp) during activity recording",
+    "Tabular/monospace alignment for stats scanning",
+    "PR celebrations: gold badge animation with confetti",
+    "Route maps with gradient elevation coloring"
+  ]},
+
+  { type: "app-card", title: "1.4 Freeletics", lines: [
+    { label: "Background", hex: "#0A0A0A", desc: "Near-black" },
+    { label: "Accent", hex: "#00E5A0", desc: "Teal/mint green" },
+    { label: "Intensity", hex: "#FF4D4D", desc: "Warning/red" }
+  ], notes: [
+    "Extremely large countdown timers (100sp+)",
+    "Full-screen video/animation with dark overlay for exercise instruction",
+    "Rep counter: massive centered number, pulses on each rep",
+    "Minimal UI during exercise — just essentials"
+  ]},
+
+  { type: "app-card", title: "1.5 Fitbod", lines: [
+    { label: "Background", hex: "#000000", desc: "True black" },
+    { label: "Accent", hex: "#007AFF", desc: "Blue (iOS-native)" },
+    { label: "Fresh", hex: "#4CD964", desc: "Muscle recovered" },
+    { label: "Moderate", hex: "#FFCC00", desc: "Muscle moderate" },
+    { label: "Fatigued", hex: "#FF3B30", desc: "Muscle fatigued" }
+  ], notes: [
+    "3D body outline with color-coded muscle recovery",
+    "+/- steppers for weight/reps (great for gym use)",
+    "Previous workout numbers shown as ghost text",
+    "Rest timer integrated inline, not a separate screen"
+  ]},
+
+  { type: "section", id: "s2" },
+  { type: "h2", text: "2. Universal Design Patterns" },
+  { type: "table", headers: ["Pattern", "Implementation"], rows: [
+    ["True black backgrounds", "All premium apps use #000000 for AMOLED"],
+    ["Numbers as heroes", "Timer/reps/weight always largest (48-120sp)"],
+    ["Minimal during-workout UI", "Strip everything except current action"],
+    ["Color-coded states", "Green=done, Yellow=rest, Red=stop"],
+    ["Haptic feedback", "Every tap and completion has tactile response"],
+    ["Bottom-heavy controls", "Primary actions reachable by thumb"],
+    ["Ghost/previous data", "Show last session numbers as reference"],
+    ["Rounded cards", "12-16dp corner radius standard"],
+    ["Thin progress bars", "2-4dp horizontal bars at top for progress"]
+  ]},
+
+  { type: "section", id: "s3" },
+  { type: "h2", text: "3. Akhara Design System — \"Saffron Fire\"" },
+  { type: "h3", text: "3.1 Color Palette" },
+  { type: "h4", text: "Core Colors" },
+  { type: "colors", items: [
+    { label: "Background (AMOLED)", hex: "#000000" },
+    { label: "Surface (cards)", hex: "#121212" },
+    { label: "Surface elevated", hex: "#1E1E1E" },
+    { label: "Surface highest", hex: "#2A2A2A" }
+  ]},
+  { type: "h4", text: "Brand Accent — Saffron Fire" },
+  { type: "colors", items: [
+    { label: "Primary accent", hex: "#FF6B2C" },
+    { label: "Accent light", hex: "#FF8F5C" },
+    { label: "Accent dark", hex: "#CC5623" }
+  ]},
+  { type: "h4", text: "Semantic Colors" },
+  { type: "colors", items: [
+    { label: "Success / Set complete", hex: "#00E676" },
+    { label: "Warning / Rest timer", hex: "#FFD740" },
+    { label: "Error / Failure", hex: "#FF5252" },
+    { label: "PR / Personal Record", hex: "#FFD700" },
+    { label: "Info / Neutral", hex: "#448AFF" }
+  ]},
+  { type: "h4", text: "Text Colors" },
+  { type: "colors", items: [
+    { label: "Text primary", hex: "#FFFFFF" },
+    { label: "Text secondary", hex: "#B0B0B0" },
+    { label: "Text tertiary", hex: "#666666" }
+  ]},
+
+  { type: "h3", text: "3.2 Typography" },
+  { type: "p", text: "Recommended font: Inter (free, Google Fonts). For hero/display: Inter Tight or Space Grotesk." },
+  { type: "table", headers: ["Role", "Weight", "Size", "Usage"], rows: [
+    ["Display Large", "800", "57sp", "Workout timer, main rep count"],
+    ["Display Medium", "700", "45sp", "Weight display during set"],
+    ["Display Small", "700", "36sp", "Rest timer countdown"],
+    ["Headline Large", "700", "32sp", "Screen titles"],
+    ["Headline Medium", "600", "28sp", "Section headers"],
+    ["Headline Small", "600", "24sp", "Exercise names"],
+    ["Title Large", "600", "22sp", "Card titles"],
+    ["Body Large", "400", "16sp", "Primary body text"],
+    ["Body Medium", "400", "14sp", "Secondary body text"],
+    ["Label Large", "500", "14sp", "Button text"],
+    ["Label Small", "500", "11sp", "Micro labels"]
+  ]},
+
+  { type: "h3", text: "3.3 Spacing System (4dp base)" },
+  { type: "pre", text: "XS:    4dp   icon padding, inline gaps\nS:     8dp   between related elements\nM:    12dp   between set rows\nL:    16dp   card padding, between cards\nXL:   24dp   section gaps, screen margins\nXXL:  32dp   between major sections\nXXXL: 48dp   top/bottom screen padding" },
+
+  { type: "h3", text: "3.4 Component Styles" },
+  { type: "h4", text: "Buttons" },
+  { type: "buttons" },
+  { type: "h4", text: "Set Row Spec" },
+  { type: "pre", text: "Layout:     [Set#] [Previous] [Weight] [Reps] [Check]\nHeight:     48dp\nInputs:     28sp Bold #FFFFFF, underline-style\nCompleted:  #FF6B2C at 8% tint background\nCheckbox:   24dp rounded square, #FF6B2C fill" },
+  { type: "h4", text: "Rest Timer" },
+  { type: "pre", text: "Style:      Circular countdown (WHOOP-style)\nSize:       200dp diameter\nRing:       8dp stroke, #FFD740 → #FF5252\nCenter:     45sp remaining seconds\nLabel:      \"REST\" in 12sp #666666" },
+  { type: "h4", text: "Progress Bar" },
+  { type: "progress" },
+
+  { type: "section", id: "s4" },
+  { type: "h2", text: "3.5 Micro-Interactions" },
+  { type: "table", headers: ["Moment", "Animation"], rows: [
+    ["Set completed", "Checkbox bounce (0.8→1.1→1.0, 200ms) + row tint #00E676 at 6% + haptic"],
+    ["PR hit", "Gold shimmer sweep + \"PR\" badge pop-in + medium haptic burst"],
+    ["Rest timer end", "Ring amber→red last 5s, number pulses last 3s, \"GO\" replaces number"],
+    ["Workout start", "Bottom-up slide + first card animates in + strong haptic"],
+    ["Workout finish", "Stats count-up + gold confetti if PRs + staggered card reveals"]
+  ]},
+
+  { type: "section", id: "s5" },
+  { type: "h2", text: "4. India-Specific Considerations" },
+  { type: "p", text: "Saffron/orange resonates with Indian fitness culture — akhara = wrestling pit, traditionally saffron-associated." },
+  { type: "table", headers: ["Factor", "Detail"], rows: [
+    ["AMOLED dominant", "Samsung, OnePlus, Realme in 15K-30K INR range — true black saves battery"],
+    ["Screen sizes", "6.4-6.7\" most popular — optimize for this"],
+    ["Gym lighting", "High ambient light + sweaty fingers → need high contrast, 48dp+ touch targets"],
+    ["vs Cult.fit", "Cult uses bright yellow #F5C518 — Akhara's saffron is warmer, more grounded"],
+    ["vs HealthifyMe", "Light-themed, diet-focused — Akhara's dark gym focus is differentiated"],
+    ["Background kills", "Indian phones aggressively kill services — persistent notification critical"]
+  ]},
+
+  { type: "section", id: "s6" },
+  { type: "h2", text: "5. Implementation Priority" },
+  { type: "table", headers: ["Phase", "Items"], rows: [
+    ["Phase 1: Foundation", "True black bg, surface elevation, saffron accent, Inter font, 16dp cards, 48dp touch targets"],
+    ["Phase 2: Polish", "Set completion animation, circular rest timer, progress bar, ghost data, collapse animation"],
+    ["Phase 3: Delight", "PR gold celebration, workout summary count-up, haptic system, shared element transitions"]
+  ]},
+
+  { type: "section", id: "s7" },
+  { type: "h2", text: "The Akhara Look" },
+  { type: "quote", text: "True black. Saffron fire. Big numbers. Minimal chrome. Gym-proof." },
+  { type: "p", text: "Black canvas, warm saffron energy. Numbers dominate during workout. Every interaction has tactile feedback. Completed work is celebrated. Feels like a premium tool built for serious lifters — not a generic health app. Works perfectly at arm's length on a squat rack with sweaty hands." }
+];
+
+const target = document.getElementById('streamTarget');
+const cursor = document.getElementById('cursor');
+const progress = document.getElementById('mainProgress');
+let totalItems = DOC.length;
+let currentItem = 0;
+
+function createColorRow(item) {
+  const row = document.createElement('div');
+  row.className = 'color-row stream-line';
+  row.innerHTML = `
+    <div class="color-swatch" style="background:${item.hex}"></div>
+    <div class="color-info">
+      <span class="color-name">${item.label}</span>
+      <span class="color-hex">${item.hex}</span>
+    </div>`;
+  return row;
+}
+
+function streamNext() {
+  if (currentItem >= DOC.length) {
+    cursor.style.display = 'none';
+    progress.style.width = '100%';
+    return;
+  }
+
+  const item = DOC[currentItem];
+  currentItem++;
+  progress.style.width = ((currentItem / totalItems) * 100) + '%';
+
+  let el;
+  switch (item.type) {
+    case 'section':
+      el = document.createElement('div');
+      el.className = 'section';
+      el.id = item.id;
+      target.appendChild(el);
+      setTimeout(() => el.classList.add('visible'), 50);
+      setTimeout(streamNext, 100);
+      return;
+
+    case 'h2':
+      el = document.createElement('h2');
+      el.className = 'stream-line';
+      typeText(el, item.text, () => { setTimeout(streamNext, 200); });
+      break;
+
+    case 'h3':
+      el = document.createElement('h3');
+      el.className = 'stream-line';
+      typeText(el, item.text, () => { setTimeout(streamNext, 150); });
+      break;
+
+    case 'h4':
+      el = document.createElement('h4');
+      el.className = 'stream-line';
+      typeText(el, item.text, () => { setTimeout(streamNext, 100); });
+      break;
+
+    case 'p':
+      el = document.createElement('p');
+      el.className = 'stream-line';
+      typeText(el, item.text, () => { setTimeout(streamNext, 150); });
+      break;
+
+    case 'quote':
+      el = document.createElement('p');
+      el.className = 'stream-line';
+      el.style.cssText = 'font-size:20px;font-weight:700;color:var(--accent);text-align:center;padding:32px 0;border-top:1px solid var(--surface-highest);border-bottom:1px solid var(--surface-highest);margin:24px 0;';
+      typeText(el, item.text, () => { setTimeout(streamNext, 300); });
+      break;
+
+    case 'pre':
+      el = document.createElement('pre');
+      el.className = 'stream-line';
+      typeText(el, item.text, () => { setTimeout(streamNext, 200); }, 5);
+      break;
+
+    case 'colors':
+      const container = document.createElement('div');
+      let i = 0;
+      function nextColor() {
+        if (i >= item.items.length) { setTimeout(streamNext, 150); return; }
+        const row = createColorRow(item.items[i]);
+        container.appendChild(row);
+        target.appendChild(container);
+        setTimeout(() => row.classList.add('revealed'), 30);
+        i++;
+        setTimeout(nextColor, 120);
+      }
+      nextColor();
+      return;
+
+    case 'table':
+      el = document.createElement('table');
+      el.className = 'stream-line';
+      let html = '<thead><tr>';
+      item.headers.forEach(h => html += `<th>${h}</th>`);
+      html += '</tr></thead><tbody>';
+      item.rows.forEach(r => {
+        html += '<tr>';
+        r.forEach(c => html += `<td>${c}</td>`);
+        html += '</tr>';
+      });
+      html += '</tbody>';
+      el.innerHTML = html;
+      target.appendChild(el);
+      setTimeout(() => el.classList.add('revealed'), 30);
+      setTimeout(streamNext, 300);
+      return;
+
+    case 'app-card':
+      el = document.createElement('div');
+      el.className = 'app-card stream-line';
+      let cardHtml = `<h3>${item.title}</h3>`;
+      item.lines.forEach(l => {
+        cardHtml += `<div class="color-row">
+          <div class="color-swatch" style="background:${l.hex}"></div>
+          <div class="color-info">
+            <span class="color-name">${l.label}</span>
+            <span class="color-hex">${l.hex} — ${l.desc}</span>
+          </div></div>`;
+      });
+      cardHtml += '<ul style="margin-top:16px">';
+      item.notes.forEach(n => cardHtml += `<li>${n}</li>`);
+      cardHtml += '</ul>';
+      el.innerHTML = cardHtml;
+      target.appendChild(el);
+      setTimeout(() => el.classList.add('revealed'), 30);
+      setTimeout(streamNext, 400);
+      return;
+
+    case 'buttons':
+      el = document.createElement('div');
+      el.className = 'component-preview stream-line';
+      el.innerHTML = `
+        <div class="label">Interactive Preview</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+          <button class="btn-preview btn-primary">START WORKOUT</button>
+          <button class="btn-preview btn-secondary">Add Set</button>
+          <button class="btn-preview btn-danger">Delete</button>
+          <button class="btn-preview btn-ghost">Cancel</button>
+        </div>`;
+      target.appendChild(el);
+      setTimeout(() => el.classList.add('revealed'), 30);
+      setTimeout(streamNext, 300);
+      return;
+
+    case 'progress':
+      el = document.createElement('div');
+      el.className = 'component-preview stream-line';
+      el.innerHTML = `
+        <div class="label">Progress Bar Preview</div>
+        <div class="progress-demo"><div class="progress-fill" id="demoProgress"></div></div>
+        <p style="margin-top:8px;font-size:12px;color:var(--text-tertiary)">3dp height, gradient from saffron → green</p>`;
+      target.appendChild(el);
+      setTimeout(() => {
+        el.classList.add('revealed');
+        const dp = document.getElementById('demoProgress');
+        if (dp) setTimeout(() => dp.style.width = '65%', 300);
+      }, 30);
+      setTimeout(streamNext, 400);
+      return;
+
+    default:
+      setTimeout(streamNext, 50);
+      return;
+  }
+
+  target.appendChild(el);
+  target.appendChild(cursor);
+}
+
+function typeText(el, text, onDone, speed = 12) {
+  el.classList.add('revealed');
+  let i = 0;
+  const interval = setInterval(() => {
+    const chunk = Math.min(speed, text.length - i);
+    el.textContent += text.substring(i, i + chunk);
+    i += chunk;
+    el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    if (i >= text.length) {
+      clearInterval(interval);
+      if (onDone) onDone();
+    }
+  }, 20);
+}
+
+// Resize label
+const container = document.getElementById('container');
+const resizeLabel = document.getElementById('resizeLabel');
+new ResizeObserver(entries => {
+  const { width, height } = entries[0].contentRect;
+  resizeLabel.textContent = `${Math.round(width)} × ${Math.round(height)}`;
+}).observe(container);
+
+// Start streaming after a brief pause
+setTimeout(streamNext, 800);
+</script>
+</body>
+</html>

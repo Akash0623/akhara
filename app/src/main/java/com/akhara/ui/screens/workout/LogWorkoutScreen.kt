@@ -55,6 +55,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.akhara.service.WorkoutService
+import com.akhara.ui.screens.workout.LockScreenWorkoutActivity
 import com.akhara.ui.components.ExerciseCard
 import com.akhara.ui.components.GlassCard
 import com.akhara.ui.components.MuscleGroupChip
@@ -224,14 +225,28 @@ fun LogWorkoutScreen(
                         Button(
                             onClick = {
                                 if (viewModel.isNotificationPermissionNeeded()) {
-                                    notificationPermissionLauncher.launch(
-                                        android.Manifest.permission.POST_NOTIFICATIONS
-                                    )
+                                    try {
+                                        notificationPermissionLauncher.launch(
+                                            android.Manifest.permission.POST_NOTIFICATIONS
+                                        )
+                                    } catch (_: Exception) {
+                                        // requestCode overflow on some devices — open settings as fallback
+                                        val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                                            putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                                        }
+                                        context.startActivity(intent)
+                                    }
                                 } else {
                                     if (!viewModel.checkNotificationChannel()) {
                                         viewModel.showNotificationDialog(NotificationDialogType.LockScreenGuidance)
                                     }
                                     viewModel.startWorkoutService()
+                                    // Auto-launch the lock screen workout controller (like Google Maps navigation)
+                                    context.startActivity(
+                                        Intent(context, LockScreenWorkoutActivity::class.java).apply {
+                                            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                                        }
+                                    )
                                 }
                             },
                             colors = ButtonDefaults.buttonColors(
@@ -309,11 +324,11 @@ fun LogWorkoutScreen(
                                 modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
                                 horizontalArrangement = Arrangement.SpaceEvenly
                             ) {
-                                Text("SET", fontSize = 11.sp, color = TextSecondary, fontWeight = FontWeight.Medium)
-                                Text("REPS", fontSize = 11.sp, color = TextSecondary, fontWeight = FontWeight.Medium)
-                                Text("KG", fontSize = 11.sp, color = TextSecondary, fontWeight = FontWeight.Medium)
+                                Text("SET", fontSize = 14.sp, color = TextSecondary, fontWeight = FontWeight.Medium)
+                                Text("REPS", fontSize = 14.sp, color = TextSecondary, fontWeight = FontWeight.Medium)
+                                Text("KG", fontSize = 14.sp, color = TextSecondary, fontWeight = FontWeight.Medium)
                                 if (entry.sets.size > 1) {
-                                    Text("REST", fontSize = 11.sp, color = TextSecondary, fontWeight = FontWeight.Medium)
+                                    Text("REST", fontSize = 14.sp, color = TextSecondary, fontWeight = FontWeight.Medium)
                                 } else {
                                     Text("", fontSize = 11.sp)
                                 }
@@ -497,7 +512,7 @@ fun LogWorkoutScreen(
                     Spacer(modifier = Modifier.height(10.dp))
 
                     LazyColumn(
-                        modifier = Modifier.height(400.dp),
+                        modifier = Modifier.weight(1f).fillMaxWidth(),
                         verticalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
                         val grouped = state.availableExercises.groupBy { it.muscleGroup }

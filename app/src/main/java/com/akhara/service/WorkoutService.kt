@@ -2,8 +2,10 @@ package com.akhara.service
 
 import android.app.Notification
 import android.app.Service
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.CountDownTimer
@@ -11,7 +13,9 @@ import android.os.IBinder
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
+import android.support.v4.media.session.MediaSessionCompat
 import com.akhara.ui.components.SetData
+import com.akhara.ui.screens.workout.LockScreenWorkoutActivity
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -53,12 +57,37 @@ class WorkoutService : Service() {
     private var currentSetIdx = 0
     private var restTimer: CountDownTimer? = null
     private var isTimerFinishing = false
+    private lateinit var mediaSession: MediaSessionCompat
+
+    private val screenOnReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            if (intent.action == Intent.ACTION_SCREEN_ON && _state.value.isActive) {
+                launchLockScreenActivity()
+            }
+        }
+    }
 
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onCreate() {
         super.onCreate()
         WorkoutNotificationManager.createChannel(this)
+        mediaSession = WorkoutNotificationManager.getOrCreateMediaSession(this)
+        mediaSession.setCallback(object : MediaSessionCompat.Callback() {
+            override fun onPlay() { onDoneSet() }
+            override fun onPause() { onDoneSet() }
+            override fun onSkipToNext() { onSkipExercise() }
+            override fun onSkipToPrevious() { onAdjustReps(-1) }
+            override fun onStop() { onFinish() }
+        })
+        registerReceiver(screenOnReceiver, IntentFilter(Intent.ACTION_SCREEN_ON))
+    }
+
+    private fun launchLockScreenActivity() {
+        val activityIntent = Intent(this, LockScreenWorkoutActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        }
+        startActivity(activityIntent)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -86,7 +115,8 @@ class WorkoutService : Service() {
                     currentSetIdx = 0
                     _completedSets.value = emptyList()
                     updateState()
-                    val notification = WorkoutNotificationManager.buildNotification(this, _state.value)
+                    WorkoutNotificationManager.updateMediaSession(mediaSession, _state.value)
+                    val notification = WorkoutNotificationManager.buildNotification(this, _state.value, mediaSession)
                     startForegroundCompat(notification)
                 }
             }
@@ -99,7 +129,7 @@ class WorkoutService : Service() {
             startForeground(
                 WorkoutNotificationManager.NOTIFICATION_ID,
                 notification,
-                ServiceInfo.FOREGROUND_SERVICE_TYPE_HEALTH
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
             )
         } else {
             startForeground(
@@ -171,6 +201,7 @@ class WorkoutService : Service() {
     private fun onFinish() {
         cancelRestTimer()
         _state.value = WorkoutServiceState()
+        WorkoutNotificationManager.releaseMediaSession()
         stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
     }
@@ -251,7 +282,8 @@ class WorkoutService : Service() {
     private fun updateNotification() {
         if (!_state.value.isActive) return
         try {
-            val notification = WorkoutNotificationManager.buildNotification(this, _state.value)
+            WorkoutNotificationManager.updateMediaSession(mediaSession, _state.value)
+            val notification = WorkoutNotificationManager.buildNotification(this, _state.value, mediaSession)
             val manager = getSystemService(NOTIFICATION_SERVICE) as android.app.NotificationManager
             manager.notify(WorkoutNotificationManager.NOTIFICATION_ID, notification)
         } catch (_: Exception) {
@@ -285,7 +317,9 @@ class WorkoutService : Service() {
     }
 
     override fun onDestroy() {
+        try { unregisterReceiver(screenOnReceiver) } catch (_: Exception) {}
         cancelRestTimer()
+        WorkoutNotificationManager.releaseMediaSession()
         _state.value = WorkoutServiceState()
         super.onDestroy()
     }

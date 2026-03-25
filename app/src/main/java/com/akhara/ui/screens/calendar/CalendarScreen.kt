@@ -17,6 +17,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Edit
+import androidx.compose.material.icons.rounded.Visibility
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -49,7 +50,8 @@ import java.time.format.DateTimeFormatter
 fun CalendarScreen(
     viewModel: CalendarViewModel,
     onLogWorkout: () -> Unit,
-    onEditWorkout: (Int) -> Unit = {}
+    onEditWorkout: (Int) -> Unit = {},
+    onViewWorkout: (Int) -> Unit = {}
 ) {
     val state by viewModel.uiState.collectAsState()
     var sessionToDelete by remember { mutableStateOf<com.akhara.data.db.entity.WorkoutSession?>(null) }
@@ -162,16 +164,17 @@ fun CalendarScreen(
                                         )
                                     }
                                 }
-                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                                     IconButton(onClick = { sessionToDelete = session }) {
                                         Icon(
                                             Icons.Rounded.Delete,
                                             contentDescription = "Delete",
-                                            tint = Destructive.copy(alpha = 0.7f)
+                                            tint = Destructive.copy(alpha = 0.7f),
+                                            modifier = Modifier.size(20.dp)
                                         )
                                     }
                                     Button(
-                                        onClick = { onEditWorkout(session.id) },
+                                        onClick = { onViewWorkout(session.id) },
                                         shape = RoundedCornerShape(10.dp),
                                         colors = ButtonDefaults.buttonColors(
                                             containerColor = PrimaryTeal,
@@ -179,12 +182,26 @@ fun CalendarScreen(
                                         )
                                     ) {
                                         Icon(
+                                            Icons.Rounded.Visibility,
+                                            contentDescription = "View",
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                        Spacer(modifier = Modifier.size(4.dp))
+                                        Text("View", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                                    }
+                                    Button(
+                                        onClick = { onEditWorkout(session.id) },
+                                        shape = RoundedCornerShape(10.dp),
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = SurfaceCard,
+                                            contentColor = PrimaryTeal
+                                        )
+                                    ) {
+                                        Icon(
                                             Icons.Rounded.Edit,
                                             contentDescription = "Edit",
                                             modifier = Modifier.size(16.dp)
                                         )
-                                        Spacer(modifier = Modifier.size(4.dp))
-                                        Text("Edit", fontWeight = FontWeight.Bold, fontSize = 13.sp)
                                     }
                                 }
                             }

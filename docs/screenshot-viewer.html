@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Akhara — Screenshot Viewer</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #000;
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    user-select: none;
+  }
+
+  /* Toolbar */
+  .toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: #121212;
+    border-bottom: 1px solid #2A2A2A;
+    flex-shrink: 0;
+    z-index: 10;
+  }
+  .toolbar-group {
+    display: flex;
+    gap: 4px;
+    padding: 0 8px;
+    border-right: 1px solid #2A2A2A;
+  }
+  .toolbar-group:last-child { border-right: none; }
+
+  .tool-btn {
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 10px;
+    background: transparent;
+    color: #B0B0B0;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+  .tool-btn:hover { background: #1E1E1E; color: #fff; }
+  .tool-btn.active { background: #FF6B2C; color: #000; }
+  .tool-btn.danger:hover { background: #FF5252; color: #fff; }
+
+  .color-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: border-color 0.15s, transform 0.15s;
+  }
+  .color-btn:hover { transform: scale(1.15); }
+  .color-btn.active { border-color: #fff; transform: scale(1.15); }
+
+  .size-slider {
+    width: 80px;
+    accent-color: #FF6B2C;
+    cursor: pointer;
+  }
+
+  .toolbar-label {
+    font-size: 11px;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .file-info {
+    margin-left: auto;
+    font-size: 12px;
+    color: #666;
+    font-family: monospace;
+  }
+
+  /* Canvas area */
+  .canvas-area {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    background: #0A0A0A;
+  }
+
+  .canvas-wrapper {
+    position: relative;
+    display: inline-block;
+    box-shadow: 0 0 60px rgba(255,107,44,0.05);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  #imgCanvas {
+    display: block;
+    max-height: calc(100vh - 120px);
+    max-width: calc(100vw - 40px);
+    border-radius: 8px;
+  }
+
+  #drawCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    border-radius: 8px;
+    cursor: crosshair;
+  }
+
+  /* Drop zone */
+  .drop-zone {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 2px dashed #2A2A2A;
+    border-radius: 24px;
+    margin: 24px;
+    transition: border-color 0.3s, background 0.3s;
+    cursor: pointer;
+  }
+  .drop-zone.over {
+    border-color: #FF6B2C;
+    background: rgba(255,107,44,0.05);
+  }
+  .drop-zone .icon { font-size: 64px; margin-bottom: 16px; }
+  .drop-zone .text { font-size: 18px; color: #666; }
+  .drop-zone .hint { font-size: 13px; color: #444; margin-top: 8px; }
+
+  /* Status bar */
+  .statusbar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 6px 16px;
+    background: #0A0A0A;
+    border-top: 1px solid #1E1E1E;
+    font-size: 11px;
+    color: #666;
+    flex-shrink: 0;
+  }
+
+  /* Save modal */
+  .save-toast {
+    position: fixed;
+    top: 70px;
+    right: 20px;
+    background: #1E1E1E;
+    border: 1px solid #FF6B2C;
+    border-radius: 12px;
+    padding: 12px 20px;
+    font-size: 13px;
+    color: #00E676;
+    z-index: 100;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.3s;
+    pointer-events: none;
+  }
+  .save-toast.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Keyboard shortcuts hint */
+  .shortcuts {
+    position: fixed;
+    bottom: 40px;
+    right: 20px;
+    background: #121212;
+    border: 1px solid #2A2A2A;
+    border-radius: 12px;
+    padding: 16px;
+    font-size: 11px;
+    color: #666;
+    z-index: 50;
+    display: none;
+  }
+  .shortcuts.show { display: block; }
+  .shortcuts table { width: 100%; }
+  .shortcuts td { padding: 3px 8px; }
+  .shortcuts .key {
+    background: #2A2A2A;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: monospace;
+    color: #B0B0B0;
+  }
+</style>
+</head>
+<body>
+
+<div class="toolbar" id="toolbar" style="display:none">
+  <div class="toolbar-group">
+    <button class="tool-btn active" id="btnPencil" onclick="setTool('pencil')" title="Pencil (P)">✏️</button>
+    <button class="tool-btn" id="btnArrow" onclick="setTool('arrow')" title="Arrow (A)">↗️</button>
+    <button class="tool-btn" id="btnRect" onclick="setTool('rect')" title="Rectangle (R)">⬜</button>
+    <button class="tool-btn" id="btnCircle" onclick="setTool('circle')" title="Circle (C)">⭕</button>
+    <button class="tool-btn" id="btnText" onclick="setTool('text')" title="Text (T)">T</button>
+    <button class="tool-btn" id="btnMove" onclick="setTool('move')" title="Move (V)">✋</button>
+  </div>
+
+  <div class="toolbar-group">
+    <div class="color-btn active" style="background:#FF6B2C" onclick="setColor('#FF6B2C')" data-color="#FF6B2C"></div>
+    <div class="color-btn" style="background:#FF5252" onclick="setColor('#FF5252')" data-color="#FF5252"></div>
+    <div class="color-btn" style="background:#00E676" onclick="setColor('#00E676')" data-color="#00E676"></div>
+    <div class="color-btn" style="background:#448AFF" onclick="setColor('#448AFF')" data-color="#448AFF"></div>
+    <div class="color-btn" style="background:#FFD700" onclick="setColor('#FFD700')" data-color="#FFD700"></div>
+    <div class="color-btn" style="background:#FFFFFF" onclick="setColor('#FFFFFF')" data-color="#FFFFFF"></div>
+  </div>
+
+  <div class="toolbar-group">
+    <span class="toolbar-label">Size</span>
+    <input type="range" class="size-slider" id="sizeSlider" min="1" max="20" value="3" oninput="brushSize=this.value">
+  </div>
+
+  <div class="toolbar-group">
+    <button class="tool-btn" onclick="undo()" title="Undo (Ctrl+Z)">↩️</button>
+    <button class="tool-btn danger" onclick="clearAll()" title="Clear All">🗑️</button>
+    <button class="tool-btn" onclick="saveAnnotated()" title="Save (Ctrl+S)">💾</button>
+    <button class="tool-btn" onclick="toggleShortcuts()" title="Shortcuts (?)">❓</button>
+  </div>
+
+  <span class="file-info" id="fileInfo"></span>
+</div>
+
+<div class="canvas-area" id="canvasArea">
+  <div class="drop-zone" id="dropZone">
+    <div class="icon">📱</div>
+    <div class="text">Drop a screenshot here</div>
+    <div class="hint">or click to browse • or paste from clipboard (Ctrl+V)</div>
+    <input type="file" id="fileInput" accept="image/*" style="display:none">
+  </div>
+
+  <div class="canvas-wrapper" id="canvasWrapper" style="display:none">
+    <canvas id="imgCanvas"></canvas>
+    <canvas id="drawCanvas"></canvas>
+  </div>
+</div>
+
+<div class="statusbar" id="statusbar">
+  <span id="statusTool">Tool: Pencil</span>
+  <span id="statusSize">Size: 3px</span>
+  <span id="statusPos">-</span>
+  <span id="statusLayers">Strokes: 0</span>
+</div>
+
+<div class="save-toast" id="saveToast">Saved!</div>
+
+<div class="shortcuts" id="shortcuts">
+  <table>
+    <tr><td class="key">P</td><td>Pencil</td></tr>
+    <tr><td class="key">A</td><td>Arrow</td></tr>
+    <tr><td class="key">R</td><td>Rectangle</td></tr>
+    <tr><td class="key">C</td><td>Circle</td></tr>
+    <tr><td class="key">T</td><td>Text</td></tr>
+    <tr><td class="key">V</td><td>Move/Pan</td></tr>
+    <tr><td class="key">Ctrl+Z</td><td>Undo</td></tr>
+    <tr><td class="key">Ctrl+S</td><td>Save annotated</td></tr>
+    <tr><td class="key">Ctrl+V</td><td>Paste screenshot</td></tr>
+    <tr><td class="key">1-6</td><td>Switch color</td></tr>
+    <tr><td class="key">[ ]</td><td>Brush size ±</td></tr>
+    <tr><td class="key">?</td><td>Toggle shortcuts</td></tr>
+  </table>
+</div>
+
+<script>
+let currentTool = 'pencil';
+let currentColor = '#FF6B2C';
+let brushSize = 3;
+let isDrawing = false;
+let strokes = []; // history for undo
+let currentStroke = null;
+let imgCanvas, imgCtx, drawCanvas, drawCtx;
+let imgWidth = 0, imgHeight = 0;
+let startX, startY;
+
+// Load the default screenshot
+const DEFAULT_IMG = '../screenshots/20260322_071511.png';
+
+window.addEventListener('DOMContentLoaded', () => {
+  imgCanvas = document.getElementById('imgCanvas');
+  imgCtx = imgCanvas.getContext('2d');
+  drawCanvas = document.getElementById('drawCanvas');
+  drawCtx = drawCanvas.getContext('2d');
+
+  setupDropZone();
+  setupDrawing();
+  setupKeyboard();
+
+  // Try loading default screenshot
+  const img = new Image();
+  img.onload = () => loadImage(img, 'screenshot.png');
+  img.onerror = () => {}; // Show drop zone
+  img.src = DEFAULT_IMG;
+});
+
+function setupDropZone() {
+  const dz = document.getElementById('dropZone');
+  const fi = document.getElementById('fileInput');
+
+  dz.addEventListener('click', () => fi.click());
+  fi.addEventListener('change', (e) => {
+    if (e.target.files[0]) loadFile(e.target.files[0]);
+  });
+
+  dz.addEventListener('dragover', (e) => { e.preventDefault(); dz.classList.add('over'); });
+  dz.addEventListener('dragleave', () => dz.classList.remove('over'));
+  dz.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dz.classList.remove('over');
+    if (e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]);
+  });
+
+  // Paste from clipboard
+  document.addEventListener('paste', (e) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    for (const item of items) {
+      if (item.type.startsWith('image/')) {
+        loadFile(item.getAsFile());
+        return;
+      }
+    }
+  });
+}
+
+function loadFile(file) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const img = new Image();
+    img.onload = () => loadImage(img, file.name);
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function loadImage(img, name) {
+  document.getElementById('dropZone').style.display = 'none';
+  document.getElementById('canvasWrapper').style.display = 'block';
+  document.getElementById('toolbar').style.display = 'flex';
+
+  // Scale to fit viewport
+  const maxH = window.innerHeight - 120;
+  const maxW = window.innerWidth - 40;
+  let scale = Math.min(maxW / img.width, maxH / img.height, 1);
+  imgWidth = Math.floor(img.width * scale);
+  imgHeight = Math.floor(img.height * scale);
+
+  imgCanvas.width = imgWidth;
+  imgCanvas.height = imgHeight;
+  drawCanvas.width = imgWidth;
+  drawCanvas.height = imgHeight;
+
+  imgCtx.drawImage(img, 0, 0, imgWidth, imgHeight);
+
+  strokes = [];
+  drawCtx.clearRect(0, 0, imgWidth, imgHeight);
+
+  document.getElementById('fileInfo').textContent = `${name} • ${img.width}×${img.height}`;
+  updateStatus();
+}
+
+function setupDrawing() {
+  const c = document.getElementById('drawCanvas');
+
+  c.addEventListener('mousedown', (e) => {
+    const rect = c.getBoundingClientRect();
+    startX = e.clientX - rect.left;
+    startY = e.clientY - rect.top;
+    isDrawing = true;
+
+    if (currentTool === 'pencil') {
+      currentStroke = {
+        type: 'pencil',
+        color: currentColor,
+        size: brushSize,
+        points: [{ x: startX, y: startY }]
+      };
+    } else if (currentTool === 'text') {
+      const text = prompt('Enter text:');
+      if (text) {
+        const stroke = { type: 'text', color: currentColor, size: brushSize * 6, x: startX, y: startY, text };
+        strokes.push(stroke);
+        redrawAll();
+      }
+      isDrawing = false;
+    }
+  });
+
+  c.addEventListener('mousemove', (e) => {
+    const rect = c.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    document.getElementById('statusPos').textContent = `${Math.round(x)}, ${Math.round(y)}`;
+
+    if (!isDrawing) return;
+
+    if (currentTool === 'pencil' && currentStroke) {
+      currentStroke.points.push({ x, y });
+      redrawAll();
+      // Draw current stroke live
+      drawPencil(drawCtx, currentStroke);
+    } else if (['arrow', 'rect', 'circle'].includes(currentTool)) {
+      redrawAll();
+      const preview = { type: currentTool, color: currentColor, size: brushSize, x1: startX, y1: startY, x2: x, y2: y };
+      drawShape(drawCtx, preview);
+    }
+  });
+
+  c.addEventListener('mouseup', (e) => {
+    if (!isDrawing) return;
+    isDrawing = false;
+
+    const rect = c.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    if (currentTool === 'pencil' && currentStroke) {
+      strokes.push(currentStroke);
+      currentStroke = null;
+    } else if (['arrow', 'rect', 'circle'].includes(currentTool)) {
+      strokes.push({ type: currentTool, color: currentColor, size: brushSize, x1: startX, y1: startY, x2: x, y2: y });
+    }
+
+    redrawAll();
+    updateStatus();
+  });
+
+  c.addEventListener('mouseleave', () => {
+    if (isDrawing && currentTool === 'pencil' && currentStroke) {
+      strokes.push(currentStroke);
+      currentStroke = null;
+      isDrawing = false;
+      redrawAll();
+      updateStatus();
+    }
+  });
+}
+
+function redrawAll() {
+  drawCtx.clearRect(0, 0, imgWidth, imgHeight);
+  for (const s of strokes) {
+    if (s.type === 'pencil') drawPencil(drawCtx, s);
+    else if (s.type === 'text') drawText(drawCtx, s);
+    else drawShape(drawCtx, s);
+  }
+}
+
+function drawPencil(ctx, s) {
+  if (s.points.length < 2) return;
+  ctx.strokeStyle = s.color;
+  ctx.lineWidth = s.size;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.beginPath();
+  ctx.moveTo(s.points[0].x, s.points[0].y);
+  for (let i = 1; i < s.points.length; i++) {
+    ctx.lineTo(s.points[i].x, s.points[i].y);
+  }
+  ctx.stroke();
+}
+
+function drawShape(ctx, s) {
+  ctx.strokeStyle = s.color;
+  ctx.lineWidth = s.size;
+  ctx.lineCap = 'round';
+
+  if (s.type === 'rect') {
+    ctx.strokeRect(s.x1, s.y1, s.x2 - s.x1, s.y2 - s.y1);
+  } else if (s.type === 'circle') {
+    const rx = Math.abs(s.x2 - s.x1) / 2;
+    const ry = Math.abs(s.y2 - s.y1) / 2;
+    const cx = (s.x1 + s.x2) / 2;
+    const cy = (s.y1 + s.y2) / 2;
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+    ctx.stroke();
+  } else if (s.type === 'arrow') {
+    // Line
+    ctx.beginPath();
+    ctx.moveTo(s.x1, s.y1);
+    ctx.lineTo(s.x2, s.y2);
+    ctx.stroke();
+    // Arrowhead
+    const angle = Math.atan2(s.y2 - s.y1, s.x2 - s.x1);
+    const headLen = 12 + s.size * 2;
+    ctx.beginPath();
+    ctx.moveTo(s.x2, s.y2);
+    ctx.lineTo(s.x2 - headLen * Math.cos(angle - 0.4), s.y2 - headLen * Math.sin(angle - 0.4));
+    ctx.moveTo(s.x2, s.y2);
+    ctx.lineTo(s.x2 - headLen * Math.cos(angle + 0.4), s.y2 - headLen * Math.sin(angle + 0.4));
+    ctx.stroke();
+  }
+}
+
+function drawText(ctx, s) {
+  ctx.fillStyle = s.color;
+  ctx.font = `bold ${s.size}px Inter, sans-serif`;
+  ctx.fillText(s.text, s.x, s.y);
+}
+
+function setTool(tool) {
+  currentTool = tool;
+  document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+  const btn = document.getElementById('btn' + tool.charAt(0).toUpperCase() + tool.slice(1));
+  if (btn) btn.classList.add('active');
+  drawCanvas.style.cursor = tool === 'move' ? 'grab' : 'crosshair';
+  updateStatus();
+}
+
+function setColor(color) {
+  currentColor = color;
+  document.querySelectorAll('.color-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.color === color);
+  });
+}
+
+function undo() {
+  strokes.pop();
+  redrawAll();
+  updateStatus();
+}
+
+function clearAll() {
+  if (strokes.length === 0) return;
+  strokes = [];
+  redrawAll();
+  updateStatus();
+}
+
+function saveAnnotated() {
+  const saveCanvas = document.createElement('canvas');
+  saveCanvas.width = imgWidth;
+  saveCanvas.height = imgHeight;
+  const ctx = saveCanvas.getContext('2d');
+  ctx.drawImage(imgCanvas, 0, 0);
+  ctx.drawImage(drawCanvas, 0, 0);
+
+  saveCanvas.toBlob((blob) => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `annotated_${Date.now()}.png`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('Saved!');
+  });
+}
+
+function showToast(msg) {
+  const t = document.getElementById('saveToast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+function toggleShortcuts() {
+  document.getElementById('shortcuts').classList.toggle('show');
+}
+
+function updateStatus() {
+  document.getElementById('statusTool').textContent = `Tool: ${currentTool}`;
+  document.getElementById('statusSize').textContent = `Size: ${brushSize}px`;
+  document.getElementById('statusLayers').textContent = `Strokes: ${strokes.length}`;
+}
+
+function setupKeyboard() {
+  document.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'INPUT') return;
+
+    if (e.ctrlKey && e.key === 'z') { e.preventDefault(); undo(); }
+    else if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveAnnotated(); }
+    else if (e.key === 'p') setTool('pencil');
+    else if (e.key === 'a') setTool('arrow');
+    else if (e.key === 'r') setTool('rect');
+    else if (e.key === 'c') setTool('circle');
+    else if (e.key === 't') setTool('text');
+    else if (e.key === 'v') setTool('move');
+    else if (e.key === '?') toggleShortcuts();
+    else if (e.key === '[') { brushSize = Math.max(1, brushSize - 1); document.getElementById('sizeSlider').value = brushSize; updateStatus(); }
+    else if (e.key === ']') { brushSize = Math.min(20, +brushSize + 1); document.getElementById('sizeSlider').value = brushSize; updateStatus(); }
+    else if (e.key === '1') setColor('#FF6B2C');
+    else if (e.key === '2') setColor('#FF5252');
+    else if (e.key === '3') setColor('#00E676');
+    else if (e.key === '4') setColor('#448AFF');
+    else if (e.key === '5') setColor('#FFD700');
+    else if (e.key === '6') setColor('#FFFFFF');
+  });
+}
+
+// Watch for new screenshots
+let lastFile = '';
+async function watchScreenshots() {
+  try {
+    const resp = await fetch('../screenshots/');
+    // Can't directory-list via file://, so skip auto-watch
+  } catch (e) {}
+}
+</script>
+</body>
+</html>

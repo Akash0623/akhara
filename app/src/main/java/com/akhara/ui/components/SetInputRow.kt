@@ -33,9 +33,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.akhara.ui.theme.Destructive
+import com.akhara.ui.theme.PrimaryGlow
 import com.akhara.ui.theme.PrimaryTeal
 import com.akhara.ui.theme.SurfaceVariant
 import com.akhara.ui.theme.TextPrimary
+import com.akhara.ui.theme.TextSecondary
 import com.akhara.ui.theme.TextTertiary
 
 data class SetData(
@@ -86,9 +88,12 @@ fun SetInputRow(
             }
             Text(
                 text = "Last: ${lastParts.joinToString(" x ")}",
-                fontSize = 10.sp,
-                color = TextTertiary.copy(alpha = 0.8f),
-                modifier = Modifier.padding(start = 36.dp, bottom = 2.dp)
+                fontSize = 12.sp,
+                color = TextSecondary,
+                modifier = Modifier
+                    .padding(start = 36.dp, bottom = 2.dp)
+                    .background(PrimaryGlow, RoundedCornerShape(4.dp))
+                    .padding(horizontal = 6.dp, vertical = 2.dp)
             )
         }
         Row(
