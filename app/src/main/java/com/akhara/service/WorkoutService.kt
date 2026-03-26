@@ -19,6 +19,7 @@ import com.akhara.ui.screens.workout.LockScreenWorkoutActivity
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 
 data class ServiceExercise(
     val name: String,
@@ -46,7 +47,7 @@ class WorkoutService : Service() {
     }
 
     data class CompletedSetEvent(
-        val exerciseIndex: Int,
+        val exerciseId: Int,
         val setIndex: Int,
         val actualReps: Int = 0,
         val timestamp: Long = System.currentTimeMillis()
@@ -80,7 +81,11 @@ class WorkoutService : Service() {
             override fun onSkipToPrevious() { onAdjustReps(-1) }
             override fun onStop() { onFinish() }
         })
-        registerReceiver(screenOnReceiver, IntentFilter(Intent.ACTION_SCREEN_ON))
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(screenOnReceiver, IntentFilter(Intent.ACTION_SCREEN_ON), Context.RECEIVER_NOT_EXPORTED)
+        } else {
+            registerReceiver(screenOnReceiver, IntentFilter(Intent.ACTION_SCREEN_ON))
+        }
     }
 
     private fun launchLockScreenActivity() {
@@ -151,13 +156,13 @@ class WorkoutService : Service() {
             return
         }
 
-        // Record the completed set with adjusted reps
+        // Record the completed set with adjusted reps (use exerciseId for stable identity)
+        val exercise = exercises.getOrNull(currentExerciseIdx) ?: return
         val events = _completedSets.value + CompletedSetEvent(
-            currentExerciseIdx, currentSetIdx, currentState.adjustedReps
+            exercise.exerciseId, currentSetIdx, currentState.adjustedReps
         )
         _completedSets.value = events
 
-        val exercise = exercises.getOrNull(currentExerciseIdx) ?: return
         val currentSet = exercise.sets.getOrNull(currentSetIdx)
         val restSeconds = currentSet?.restSeconds?.toIntOrNull() ?: 0
 
@@ -183,7 +188,7 @@ class WorkoutService : Service() {
         if (_state.value.isResting || !_state.value.isActive) return
         val current = _state.value.adjustedReps
         val newReps = (current + delta).coerceAtLeast(0)
-        _state.value = _state.value.copy(adjustedReps = newReps)
+        _state.update { it.copy(adjustedReps = newReps) }
         updateNotification()
     }
 
@@ -201,8 +206,8 @@ class WorkoutService : Service() {
     private fun onFinish() {
         cancelRestTimer()
         _state.value = WorkoutServiceState()
-        WorkoutNotificationManager.releaseMediaSession()
         stopForeground(STOP_FOREGROUND_REMOVE)
+        WorkoutNotificationManager.releaseMediaSession()
         stopSelf()
     }
 
@@ -216,18 +221,18 @@ class WorkoutService : Service() {
         cancelRestTimer()
         isTimerFinishing = false
 
-        _state.value = _state.value.copy(
+        _state.update { it.copy(
             isResting = true,
             restSecondsRemaining = seconds
-        )
+        ) }
         updateNotification()
 
         restTimer = object : CountDownTimer(seconds * 1000L, 1000L) {
             override fun onTick(millisUntilFinished: Long) {
                 if (restTimer == null) return // timer was cancelled
-                _state.value = _state.value.copy(
+                _state.update { it.copy(
                     restSecondsRemaining = (millisUntilFinished / 1000).toInt() + 1
-                )
+                ) }
                 updateNotification()
             }
 
@@ -235,7 +240,7 @@ class WorkoutService : Service() {
                 if (restTimer == null) return // timer was cancelled
                 isTimerFinishing = true
                 vibrateRestEnd()
-                _state.value = _state.value.copy(isResting = false)
+                _state.update { it.copy(isResting = false) }
                 updateState()
                 updateNotification()
                 isTimerFinishing = false

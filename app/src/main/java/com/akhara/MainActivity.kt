@@ -1,7 +1,6 @@
 package com.akhara
 
 import android.os.Bundle
-import android.view.WindowManager
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedVisibility
@@ -50,6 +49,8 @@ class MainActivity : FragmentActivity() {
         setContent {
             AkharaTheme {
                 Box(modifier = Modifier.fillMaxSize()) {
+                    val navController = rememberNavController()
+
                     AnimatedVisibility(
                         visible = !showSplash,
                         enter = fadeIn(androidx.compose.animation.core.tween(400)),
@@ -61,7 +62,6 @@ class MainActivity : FragmentActivity() {
                                 errorMessage = lockError
                             )
                         } else {
-                            val navController = rememberNavController()
                             val navBackStackEntry by navController.currentBackStackEntryAsState()
                             val currentRoute = navBackStackEntry?.destination?.route
 

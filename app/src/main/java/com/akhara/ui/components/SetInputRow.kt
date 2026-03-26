@@ -118,7 +118,7 @@ fun SetInputRow(
                 onValueChange = onRepsChange,
                 placeholder = "Reps",
                 imeAction = ImeAction.Next,
-                onImeAction = { weightFocus.requestFocus() },
+                onImeAction = { try { weightFocus.requestFocus() } catch (_: Exception) {} },
                 modifier = Modifier.weight(1f)
             )
 
@@ -129,7 +129,7 @@ fun SetInputRow(
                 imeAction = if (isLastSet) ImeAction.Done else ImeAction.Next,
                 onImeAction = {
                     if (isLastSet) focusManager.clearFocus()
-                    else restFocus.requestFocus()
+                    else try { restFocus.requestFocus() } catch (_: Exception) {}
                 },
                 focusRequester = weightFocus,
                 modifier = Modifier.weight(1f)

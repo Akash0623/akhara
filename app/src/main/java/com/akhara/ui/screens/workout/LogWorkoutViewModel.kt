@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -92,14 +93,15 @@ class LogWorkoutViewModel(
 
                 val current = _uiState.value.selectedExercises.toMutableList()
                 for (event in newEvents) {
-                    if (event.exerciseIndex in current.indices) {
-                        val entry = current[event.exerciseIndex]
+                    val idx = current.indexOfFirst { it.exercise.id == event.exerciseId }
+                    if (idx >= 0) {
+                        val entry = current[idx]
                         if (event.setIndex in entry.sets.indices) {
                             val newSets = entry.sets.toMutableList()
                             newSets[event.setIndex] = newSets[event.setIndex].copy(
                                 reps = event.actualReps.toString()
                             )
-                            current[event.exerciseIndex] = entry.copy(sets = newSets)
+                            current[idx] = entry.copy(sets = newSets)
                         }
                     }
                 }
@@ -158,7 +160,7 @@ class LogWorkoutViewModel(
             val (dayStart, dayEnd) = repository.dayBounds(LocalDate.now())
             val todaySessions = repository.getSessionsBetweenSync(dayStart, dayEnd)
             if (todaySessions.isNotEmpty()) {
-                activeSessionId = todaySessions.first().id
+                activeSessionId = todaySessions.last().id
                 _uiState.value = _uiState.value.copy(hasAnySaved = true)
             }
 
@@ -351,9 +353,7 @@ class LogWorkoutViewModel(
             _uiState.value = _uiState.value.copy(selectedExercises = current)
 
             if (newDone) {
-                // Re-read the entry from current state to get latest set values
-                val latestEntry = _uiState.value.selectedExercises[exerciseIndex]
-                saveExerciseIncrementally(latestEntry)
+                saveExerciseIncrementally(current[exerciseIndex])
             }
         }
     }
@@ -391,8 +391,17 @@ class LogWorkoutViewModel(
                     }
                     _uiState.value = _uiState.value.copy(hasAnySaved = true)
                 }
-            } catch (_: Exception) {
-                // DB error — exercise save failed silently for now
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                android.util.Log.e("LogWorkoutVM", "Failed to save exercise ${entry.exercise.name}", e)
+                // Revert isDone so user sees it wasn't saved
+                val reverted = _uiState.value.selectedExercises.toMutableList()
+                val idx = reverted.indexOfFirst { it.exercise.id == entry.exercise.id }
+                if (idx >= 0) {
+                    reverted[idx] = reverted[idx].copy(isDone = false)
+                    _uiState.value = _uiState.value.copy(selectedExercises = reverted)
+                }
             }
         }
     }
@@ -443,7 +452,10 @@ class LogWorkoutViewModel(
                 }
                 stopWorkoutService()
                 _uiState.value = _uiState.value.copy(isSaving = false, isSaved = true)
-            } catch (_: Exception) {
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                android.util.Log.e("LogWorkoutVM", "Failed to save workout", e)
                 _uiState.value = _uiState.value.copy(isSaving = false)
             }
         }
@@ -515,7 +527,11 @@ class LogWorkoutViewModel(
         val intent = Intent(application, WorkoutService::class.java).apply {
             putExtra(WorkoutService.EXTRA_EXERCISES, encoded)
         }
-        application.startForegroundService(intent)
+        try {
+            application.startForegroundService(intent)
+        } catch (e: Exception) {
+            android.util.Log.e("LogWorkoutVM", "Failed to start workout service", e)
+        }
     }
 
     fun stopWorkoutService() {

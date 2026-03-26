@@ -157,9 +157,10 @@ abstract class AkharaDatabase : RoomDatabase() {
 
                 dbFile.delete()
                 tempFile.renameTo(dbFile)
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                android.util.Log.e("AkharaDB", "Encryption migration failed, keeping unencrypted DB", e)
                 tempFile.delete()
-                dbFile.delete()
+                // Do NOT delete dbFile — preserve user's data in unencrypted form
             }
         }
     }

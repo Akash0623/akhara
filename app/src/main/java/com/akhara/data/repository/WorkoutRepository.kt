@@ -63,10 +63,8 @@ class WorkoutRepository(private val db: AkharaDatabase) {
     }
 
     suspend fun updateWorkout(session: WorkoutSession, sets: List<WorkoutSet>) {
-        workoutDao.updateSession(session)
-        workoutDao.deleteSetsForSession(session.id)
         val setsWithSessionId = sets.map { it.copy(sessionId = session.id) }
-        workoutDao.insertSets(setsWithSessionId)
+        workoutDao.replaceAllSetsForSession(session, setsWithSessionId)
     }
 
     suspend fun replaceSetsForExercise(sessionId: Int, exerciseId: Int, sets: List<WorkoutSet>) {

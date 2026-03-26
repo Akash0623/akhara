@@ -145,4 +145,11 @@ interface WorkoutDao {
         deleteSetsForExercise(sessionId, exerciseId)
         insertSets(sets)
     }
+
+    @Transaction
+    suspend fun replaceAllSetsForSession(session: WorkoutSession, sets: List<WorkoutSet>) {
+        updateSession(session)
+        deleteSetsForSession(session.id)
+        insertSets(sets)
+    }
 }

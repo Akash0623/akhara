@@ -104,7 +104,16 @@ class LockScreenWorkoutActivity : ComponentActivity() {
         val intent = Intent(this, WorkoutService::class.java).apply {
             this.action = action
         }
-        startService(intent)
+        try {
+            startService(intent)
+        } catch (_: IllegalStateException) {
+            // Background restriction on some OEMs — try foreground variant
+            try {
+                startForegroundService(intent)
+            } catch (_: Exception) {
+                // Service not available — action will be lost
+            }
+        }
     }
 }
 
