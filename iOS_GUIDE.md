@@ -76,7 +76,16 @@ Can you read through this Android codebase and give me a plain-language summary 
 
 ## Step 4: Open Claude Code in Your iOS Project
 
-> **Before anything else — use this initial prompt** to give Claude the context it needs. Claude Code will read the Android repo itself and figure out the rest — you don't need to describe every feature or color manually.
+Open Terminal, navigate into your new iOS project folder, and launch Claude Code:
+
+```bash
+cd ~/Desktop/AkharaIOS
+claude
+```
+
+This is where you'll spend most of your time. Claude Code can read your Xcode project, write Swift code, create files, and guide you through building every feature.
+
+**Once Claude opens, paste this as your very first message:**
 
 ```
 I'm a beginner building an iOS port of this Android workout tracker app:
@@ -87,12 +96,7 @@ recreate it for iOS using SwiftUI. Start by suggesting the project structure and
 tech stack. Ask me questions if anything is unclear before writing code.
 ```
 
-```bash
-cd ~/Desktop/AkharaIOS
-claude
-```
-
-This is where you'll spend most of your time. Claude Code can read your Xcode project, write Swift code, create files, and guide you through building every feature.
+Claude will read the Android code, understand the full app, and guide you from there.
 
 ---
 
@@ -103,29 +107,16 @@ Don't try to build everything at once. Go screen by screen. Here's the recommend
 ### Feature 1: Design System (Colors & Typography)
 Tell Claude:
 ```
-I'm building an iOS workout tracker called Akhara. The design system is called "Saffron Fire":
-- Background: #000000 (true black AMOLED)
-- Cards/Surfaces: #121212
-- Accent: #FF6B2C (saffron orange)
-- Success: #00E676
-- Warning: #FFD740
-- Error: #FF5252
-- Text Primary: #FFFFFF
-- Text Secondary: #B0B0B0
-
-Please create a Color.swift file with all these colors as SwiftUI Color extensions, and a Typography.swift with the font styles we'll need throughout the app.
+Look at the design system in the Android repo (ui/theme/Color.kt) and recreate it
+for iOS. Create a Color.swift file with all the Saffron Fire colors as SwiftUI
+Color extensions, and a Typography.swift with the font styles we'll need.
 ```
 
-### Feature 2: Database (Core Data or SwiftData)
-The Android app uses Room database. iOS has its own built-in database called SwiftData (modern) or Core Data. Tell Claude:
+### Feature 2: Database (SwiftData)
+The Android app uses Room database. iOS uses SwiftData. Tell Claude:
 ```
-I need to set up data persistence for a workout tracker. Here are the data models I need:
-- WorkoutSession: id, name, date, notes
-- Exercise: id, name, category, muscleGroup
-- WorkoutExercise: links a session to an exercise, with orderIndex
-- WorkoutSet: id, reps, weight, isCompleted, linkedToWorkoutExercise
-
-Please set up SwiftData models for these and explain how they relate to each other.
+Look at the Room database models in the Android repo (data/db/) and recreate
+them as SwiftData models for iOS. Explain how they relate to each other.
 ```
 
 ### Feature 3: Home Screen
@@ -138,16 +129,11 @@ Build a Home screen in SwiftUI with a true black background (#000000). It should
 ```
 
 ### Feature 4: Log Workout Screen
-This is the core of the app. Reference the Android file `app/src/main/java/com/akhara/ui/screens/workout/LogWorkoutScreen.kt` and tell Claude:
+This is the core of the app. Tell Claude:
 ```
-I have the Android version of my workout logging screen at [paste the file contents].
-Please recreate this as a SwiftUI view for iOS. The screen should:
-- Show a list of exercises being logged
-- Each exercise has sets with reps and weight input fields
-- A "Done" button per exercise to collapse it
-- An "Add Exercise" button to open the exercise picker
-- A "Finish Workout" button
-- Auto-save progress as the user logs sets
+Look at the workout logging screen in the Android repo
+(ui/screens/workout/LogWorkoutScreen.kt and LogWorkoutViewModel.kt)
+and recreate it as a SwiftUI view for iOS.
 ```
 
 ### Feature 5: Exercise Library
