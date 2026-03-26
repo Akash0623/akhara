@@ -20,35 +20,15 @@ Your goal is to build the same app, but natively for iPhone using Swift and Swif
 
 ---
 
-## Step 1: Set Up Your Mac
+## Step 1: Check Git is Installed
 
-### Install Xcode
-1. Open the **App Store** on your Mac
-2. Search for **Xcode**
-3. Click **Install** — it's free (large download, ~15GB, be patient)
-4. Once installed, open Xcode once to let it install additional components
+Git is probably already on your Mac. Confirm by opening **Terminal** (`Cmd + Space` → type "Terminal") and running:
 
-### Install Claude Code
-Claude Code is the AI terminal tool you'll use to write the app.
-
-1. Open **Terminal** (press `Cmd + Space`, type "Terminal", hit Enter)
-2. First, install Node.js if you don't have it. Go to [nodejs.org](https://nodejs.org) and download the LTS version
-3. Install Claude Code:
-   ```bash
-   npm install -g @anthropic-ai/claude-code
-   ```
-4. Launch it:
-   ```bash
-   claude
-   ```
-5. Follow the login prompts to connect your Anthropic account
-
-### Install Git
-Git is probably already installed on your Mac. Check by running:
 ```bash
 git --version
 ```
-If not, your Mac will prompt you to install it automatically.
+
+If it's not installed, your Mac will prompt you to install it automatically.
 
 ---
 
