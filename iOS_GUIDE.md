@@ -20,46 +20,7 @@ Your goal is to build the same app, but natively for iPhone using Swift and Swif
 
 ---
 
-## Step 1: Check Git is Installed
-
-Git is probably already on your Mac. Confirm by opening **Terminal** (`Cmd + Space` → type "Terminal") and running:
-
-```bash
-git --version
-```
-
-If it's not installed, your Mac will prompt you to install it automatically.
-
----
-
-## Step 2: Clone the Android Repo (Your Reference)
-
-This Android codebase is your blueprint. You'll use it to understand what to build, not to copy-paste code (Android and iOS are different languages).
-
-```bash
-# Go to your home folder or wherever you keep projects
-cd ~/Desktop
-
-# Clone the repo
-git clone https://github.com/Akash0623/akhara.git
-
-# Enter the folder
-cd akhara
-```
-
-Now open Claude Code inside this folder:
-```bash
-claude
-```
-
-Ask Claude to give you a tour:
-```
-Can you read through this Android codebase and give me a plain-language summary of what each screen does and how the app is structured? I want to understand it before building the iOS version.
-```
-
----
-
-## Step 3: Create a New iOS Xcode Project
+## Step 1: Create a New iOS Xcode Project
 
 1. Open **Xcode**
 2. Click **Create New Project**
@@ -70,22 +31,20 @@ Can you read through this Android codebase and give me a plain-language summary 
    - **Organization Identifier:** com.yourname (e.g., `com.john`)
    - **Interface:** SwiftUI
    - **Language:** Swift
-5. Save it somewhere easy to find, e.g., `~/Desktop/AkharaIOS`
+5. Save it to your Desktop, e.g., `~/Desktop/AkharaIOS`
 
 ---
 
-## Step 4: Open Claude Code in Your iOS Project
+## Step 2: Start Claude Code
 
-Open Terminal, navigate into your new iOS project folder, and launch Claude Code:
+Open the **Terminal** tab inside Xcode (or open Terminal separately), navigate into your project folder, and launch Claude:
 
 ```bash
 cd ~/Desktop/AkharaIOS
 claude
 ```
 
-This is where you'll spend most of your time. Claude Code can read your Xcode project, write Swift code, create files, and guide you through building every feature.
-
-**Once Claude opens, paste this as your very first message:**
+**Paste this as your very first message:**
 
 ```
 I'm a beginner building an iOS port of this Android workout tracker app:
@@ -96,7 +55,7 @@ recreate it for iOS using SwiftUI. Start by suggesting the project structure and
 tech stack. Ask me questions if anything is unclear before writing code.
 ```
 
-Claude will read the Android code, understand the full app, and guide you from there.
+That's it. Claude will read the Android code, understand the full app, and guide you through everything from here — including any setup steps you might need.
 
 ---
 
