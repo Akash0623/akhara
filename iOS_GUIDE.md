@@ -96,36 +96,15 @@ Can you read through this Android codebase and give me a plain-language summary 
 
 ## Step 4: Open Claude Code in Your iOS Project
 
-> **Before anything else — use this initial prompt** to give Claude the full picture of what you're building. Paste this at the very start of your first Claude Code session inside the iOS project folder:
+> **Before anything else — use this initial prompt** to give Claude the context it needs. Claude Code will read the Android repo itself and figure out the rest — you don't need to describe every feature or color manually.
 
 ```
-I'm building an iOS workout tracker app called Akhara using SwiftUI and Swift in Xcode.
-It's a port of an existing Android app — the full Android source code is at https://github.com/Akash0623/akhara for reference.
+I'm a beginner building an iOS port of this Android workout tracker app:
+https://github.com/Akash0623/akhara
 
-Here's what the app does:
-- Log gym workouts: exercises, sets, reps, weight
-- Auto-save progress as the user logs sets
-- Rest timer that starts automatically after each set
-- Calendar to browse past workouts
-- Exercise library with search and muscle group categories
-- Stats and insights screen
-- Live Activity on the lock screen showing current exercise and rest timer
-
-Design system ("Saffron Fire"):
-- Background: #000000 (true black AMOLED)
-- Cards/Surfaces: #121212
-- Accent: #FF6B2C (saffron orange)
-- Success: #00E676, Warning: #FFD740, Error: #FF5252
-- Text Primary: #FFFFFF, Text Secondary: #B0B0B0
-
-Tech stack:
-- SwiftUI for all UI
-- SwiftData for local database
-- async/await for async operations
-- ActivityKit for lock screen Live Activity
-- TabView for bottom navigation (Home, Log, Calendar, Library, Stats)
-
-I'm a beginner using Claude Code to build this. Please help me build it one feature at a time, starting with the project structure and design system. Ask me questions if anything is unclear before writing code.
+Please read through that codebase first, understand what it does, then help me
+recreate it for iOS using SwiftUI. Start by suggesting the project structure and
+tech stack. Ask me questions if anything is unclear before writing code.
 ```
 
 ```bash
