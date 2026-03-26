@@ -10,7 +10,7 @@ Kotlin/Jetpack Compose Android workout tracker. MVVM architecture, Room DB with 
 - **Design System:** "Saffron Fire" — true black AMOLED + `#FF6B2C` saffron accent
 - **Target Device:** Nothing Phone 2a Pro (Android 14+)
 
-## Current State (2026-03-22)
+## Current State (2026-03-26)
 
 ### What's Working (Tested on Device)
 - Workout logging with per-exercise Done/collapse
@@ -66,21 +66,29 @@ Kotlin/Jetpack Compose Android workout tracker. MVVM architecture, Room DB with 
 
 ### Architecture Notes
 - Service state exposed via companion `StateFlow` (not ideal but works for single-instance service)
-- Exercise data encoded with `\n\n` / `\n` / `\t` / `,` delimiters for Intent extras
-- All DB writes during workout go through `saveMutex` in ViewModel
-- `@Transaction replaceSetsForExercise()` ensures atomic delete+insert in DAO
+- Exercise data encoded with `\n\n` / `\n` / `\t` / `,` delimiters for Intent extras (safe for user input — no pipes)
+- All DB writes during workout go through `saveMutex` in ViewModel (prevents duplicate session race)
+- `@Transaction replaceSetsForExercise()` and `@Transaction replaceAllSetsForSession()` ensure atomic delete+insert in DAO
 - Lock screen Activity uses `setShowWhenLocked(true)` — same API as Google Maps navigation
-- WorkoutService registers `SCREEN_ON` BroadcastReceiver to auto-relaunch lock screen Activity
+- WorkoutService registers `SCREEN_ON` BroadcastReceiver with `RECEIVER_NOT_EXPORTED` flag (API 33+)
+- `CompletedSetEvent` uses `exerciseId` (not positional index) for stable service→ViewModel sync
+- Error handling: `saveExerciseIncrementally` reverts `isDone` on failure; `CancellationException` always re-thrown
+- NavController created outside lock/unlock conditional to survive biometric cycle
+- `activeSessionId` restored from today's most recent session on reopen (prevents duplicate sessions after force-kill)
+- DB encryption migration preserves unencrypted DB on failure (never deletes user data)
+- Foreign keys enforced via `PRAGMA foreign_keys = ON` in database onOpen callback
+- `_state.update {}` used for atomic StateFlow mutations in WorkoutService
 - **NEVER** use `DecoratedCustomViewStyle` + manual `addExtras` with Parcelable media session token — this crashed the user's phone
 
 ### Lock Screen Controller Architecture
 - `LockScreenWorkoutActivity` extends `ComponentActivity` with `setShowWhenLocked(true)` + `setTurnScreenOn(true)`
 - Declared in manifest with `taskAffinity=""` and `excludeFromRecents="true"`
 - Reads state from `WorkoutService.state` (companion StateFlow)
-- Sends actions to WorkoutService via `startService(Intent)` with action strings
+- Sends actions to WorkoutService via `startService(Intent)` with try-catch + `startForegroundService` fallback for OEM background restrictions
 - Auto-launched on workout start from LogWorkoutScreen
 - Auto-relaunched by WorkoutService's SCREEN_ON BroadcastReceiver
 - Notification contentIntent also points to this Activity (works when unlocked, requires unlock on lock screen)
+- Service uses `foregroundServiceType="mediaPlayback"` with MediaSession for lock screen widget
 
 ### Notification Permission Flow
 1. User taps "Start" → `isNotificationPermissionNeeded()` checks API 33+ and permission state
@@ -106,9 +114,16 @@ Kotlin/Jetpack Compose Android workout tracker. MVVM architecture, Room DB with 
 - **Insights** — detailed workout analytics
 - **Security Settings** — app lock configuration
 
+### Multi-Agent Code Review (2026-03-26)
+- 3 rounds of parallel review agents (5 agents per round) covering: service/notification, ViewModel/data, UI/UX, silent failures, type design
+- 30+ issues found and fixed across all severity levels
+- Key patterns established: Mutex for concurrent saves, @Transaction for multi-step DB ops, CancellationException re-throw, exerciseId-based events
+
 ### Next Steps (Sprint 2)
 1. In-app rest timer with auto-start on set completion
 2. Workout duration tracking (DB migration: startedAt/finishedAt on WorkoutSession)
 3. 3-slide onboarding flow for first-time users
 4. Expand exercise library with Indian gym exercises (cable, Smith machine, traditional)
 5. PR detection and gold celebration
+6. Custom notification icon (currently uses dumbbell vector drawable — consider app-branded icon)
+7. EncryptedSharedPreferences Keystore corruption recovery
