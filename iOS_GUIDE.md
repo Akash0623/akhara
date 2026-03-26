@@ -37,7 +37,7 @@ Your goal is to build the same app, but natively for iPhone using Swift and Swif
 
 ## Step 2: Start Claude Code
 
-Open the **Terminal** tab inside Xcode (or open Terminal separately), navigate into your project folder, and launch Claude:
+Open **Terminal** (`Cmd + Space` → type "Terminal"), navigate into your project folder, and launch Claude:
 
 ```bash
 cd ~/Desktop/AkharaIOS
@@ -62,21 +62,6 @@ That's it. Claude will read the Android code, understand the full app, and guide
 ## Step 3: Let Claude Take Over
 
 Claude will plan the build, suggest the structure, and execute feature by feature. Just respond to its questions and approve its plans. You don't need to tell it what to build next — it'll figure that out from the Android codebase.
-
----
-
-## Key Files in the Android Repo to Reference
-
-| What you're building | Android reference file |
-|---|---|
-| Workout logging screen | `app/src/main/java/com/akhara/ui/screens/workout/LogWorkoutScreen.kt` |
-| Workout logic & saving | `app/src/main/java/com/akhara/ui/screens/workout/LogWorkoutViewModel.kt` |
-| Lock screen controller | `app/src/main/java/com/akhara/ui/screens/workout/LockScreenWorkoutActivity.kt` |
-| Calendar screen | `app/src/main/java/com/akhara/ui/screens/calendar/CalendarScreen.kt` |
-| View past workout | `app/src/main/java/com/akhara/ui/screens/calendar/ViewWorkoutScreen.kt` |
-| Design system colors | `app/src/main/java/com/akhara/ui/theme/Color.kt` |
-| Navigation structure | `app/src/main/java/com/akhara/ui/navigation/NavGraph.kt` |
-| Database models | `app/src/main/java/com/akhara/data/db/` |
 
 ---
 
@@ -115,4 +100,4 @@ If using a real device, you'll need to set up a free Apple Developer account in 
 - Check if Claude suggests an alternative approach
 - SwiftUI documentation: [developer.apple.com/documentation/swiftui](https://developer.apple.com/documentation/swiftui)
 
-Good luck — you've got a great reference codebase and a capable AI partner. Build it one screen at a time.
+Good luck — you've got a great reference codebase and a capable AI partner.
