@@ -59,7 +59,7 @@ That's it. Claude will read the Android code, understand the full app, and guide
 
 ---
 
-## Step 5: Build Feature by Feature
+## Step 3: Build Feature by Feature
 
 Don't try to build everything at once. Go screen by screen. Here's the recommended order — from easiest to most complex:
 
@@ -72,23 +72,21 @@ Color extensions, and a Typography.swift with the font styles we'll need.
 ```
 
 ### Feature 2: Database (SwiftData)
-The Android app uses Room database. iOS uses SwiftData. Tell Claude:
+Tell Claude:
 ```
 Look at the Room database models in the Android repo (data/db/) and recreate
 them as SwiftData models for iOS. Explain how they relate to each other.
 ```
 
 ### Feature 3: Home Screen
+Tell Claude:
 ```
-Build a Home screen in SwiftUI with a true black background (#000000). It should show:
-- A greeting at the top ("Good morning, let's train")
-- A "Start Workout" button in saffron orange (#FF6B2C)
-- A summary card showing today's activity (or a prompt to start if nothing logged yet)
-- Navigation to Calendar, Library, and Stats screens
+Look at the Home screen in the Android repo (ui/screens/home/) and recreate
+it as a SwiftUI view for iOS.
 ```
 
 ### Feature 4: Log Workout Screen
-This is the core of the app. Tell Claude:
+Tell Claude:
 ```
 Look at the workout logging screen in the Android repo
 (ui/screens/workout/LogWorkoutScreen.kt and LogWorkoutViewModel.kt)
@@ -96,51 +94,52 @@ and recreate it as a SwiftUI view for iOS.
 ```
 
 ### Feature 5: Exercise Library
+Tell Claude:
 ```
-Build an Exercise Library screen that shows a searchable list of exercises grouped by muscle group (Chest, Back, Legs, Shoulders, Arms, Core). Each exercise has a name and category. Tapping one adds it to the current workout.
+Look at the exercise library screen in the Android repo (ui/screens/library/)
+and recreate it as a SwiftUI view for iOS.
 ```
 
 ### Feature 6: Calendar Screen
+Tell Claude:
 ```
-Build a Calendar screen that:
-- Shows a monthly grid with dots on days that have logged workouts
-- Tapping a day shows the workouts for that day
-- Each workout entry has View and Delete options
+Look at the calendar screen in the Android repo (ui/screens/calendar/)
+and recreate it as a SwiftUI view for iOS.
 ```
 
 ### Feature 7: Rest Timer
+Tell Claude:
 ```
-Build a rest timer feature that:
-- Starts automatically when a set is marked as done
-- Shows a countdown (default 90 seconds)
-- Plays a haptic pulse when the timer ends
-- Can be skipped or adjusted
-- Shows on a minimal overlay so the user can still see their workout
+Look at how the rest timer works in the Android repo (service/WorkoutService.kt)
+and recreate it for iOS as an overlay that appears after each set is marked done.
 ```
 
-### Feature 8: Lock Screen / Live Activity (iOS equivalent)
-On iOS, the equivalent of the Android lock screen controller is called a **Live Activity** (using ActivityKit). This is an advanced feature. Tell Claude:
+### Feature 8: Lock Screen / Live Activity
+On iOS, the equivalent of the Android lock screen controller is a **Live Activity** (using ActivityKit). Tell Claude:
 ```
-I want to add a Live Activity to my workout app that shows on the iPhone lock screen and Dynamic Island while a workout is in progress. It should show the current exercise name, current set number, and a rest timer countdown. Please guide me through setting up ActivityKit for this.
+Look at the lock screen controller in the Android repo
+(ui/screens/workout/LockScreenWorkoutActivity.kt and service/WorkoutService.kt)
+and recreate it for iOS as a Live Activity using ActivityKit, showing on the
+lock screen and Dynamic Island.
 ```
 
 ---
 
-## Step 6: Tips for Working with Claude Code Effectively
+## Step 4: Tips for Working with Claude Code Effectively
 
 **Be specific.** Instead of "make it look good", say "use a dark card with #121212 background, 12pt corner radius, and saffron orange (#FF6B2C) accent for the active state."
 
-**Share context.** Start each Claude session with:
+**Share context.** At the start of each new Claude session:
 ```
-I'm building Akhara, an iOS workout tracker in SwiftUI. The design uses true black (#000000) background and saffron orange (#FF6B2C) accent. I'm currently working on [screen name].
+I'm building Akhara, an iOS workout tracker in SwiftUI. The Android reference repo
+is at https://github.com/Akash0623/akhara. I'm currently working on [screen name].
 ```
 
 **When something breaks:** Paste the exact error message to Claude and say "I got this error, how do I fix it?"
 
-**Use the Android code as reference.** When building a screen, open the corresponding Android file and paste it into Claude:
+**Point Claude to the Android file.** Instead of describing a feature manually, just tell Claude which file to look at:
 ```
-Here's how this feature works in the Android version: [paste code]
-Please build the iOS equivalent using SwiftUI and Swift.
+Look at [file path] in the Android repo and recreate it for iOS.
 ```
 
 **Commit often.** After each feature works, save your progress:
